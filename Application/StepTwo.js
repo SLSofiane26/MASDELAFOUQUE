@@ -91,6 +91,9 @@ export class StepTwo extends PureComponent {
       }));
     }
 
+    console.log('w', this.w);
+    console.log('h', this.h);
+
     let d = this.props.route.params.data;
 
     this.setState({
@@ -229,7 +232,18 @@ export class StepTwo extends PureComponent {
               width: '100%',
               display: 'flex',
               alignItems: 'center',
-              height: 50,
+              height:
+                Dimensions.get('window').width > 1066 &&
+                Dimensions.get('window').width < 1067
+                  ? 80
+                  : 50,
+              top:
+                Dimensions.get('window').width > 1066 &&
+                Dimensions.get('window').width < 1067
+                  ? 40
+                  : Dimensions.get('window').width === 800
+                  ? 10
+                  : 0,
             }}>
             {this.state.nameRoom && (
               <SelectDropdown
@@ -263,6 +277,8 @@ export class StepTwo extends PureComponent {
                       ? 20
                       : Dimensions.get('window').width === 1168
                       ? 24
+                      : Dimensions.get('window').width === 800
+                      ? 20
                       : 16,
                 }}
                 buttonStyle={{
@@ -559,23 +575,23 @@ export class StepTwo extends PureComponent {
                     marginLeft:
                       this.w === 768
                         ? Dimensions.get('window').width === 768
-                          ? '15%'
-                          : '10%'
+                          ? '17%'
+                          : '12%'
                         : Dimensions.get('window').width === 600
                         ? Dimensions.get('window').height === 912
-                          ? '14%'
-                          : '14%'
+                          ? '16%'
+                          : '20%'
                         : Dimensions.get('window').width === 540
                         ? Dimensions.get('window').height === 976
                           ? '13.5%'
-                          : '8%'
+                          : '10%'
                         : Dimensions.get('window').width === 800
                         ? '20%'
                         : Dimensions.get('window').width > 1066 &&
                           Dimensions.get('window').width < 1067
                         ? Dimensions.get('window').width > 1066 &&
                           Dimensions.get('window').width < 1067
-                          ? '15%'
+                          ? '20%'
                           : '12.5%'
                         : Dimensions.get('window').width === 1024
                         ? Dimensions.get('window').height > 1309 &&
@@ -586,15 +602,15 @@ export class StepTwo extends PureComponent {
                           Dimensions.get('window').height < 914
                         ? '14%'
                         : Dimensions.get('window').height === 1232
-                        ? '15%'
+                        ? '20%'
                         : Dimensions.get('window').height === 1224
-                        ? '15%'
+                        ? '17%'
                         : Dimensions.get('window').width > 533 &&
                           Dimensions.get('window').width < 534
-                        ? '13.5%'
+                        ? '15.5%'
                         : Dimensions.get('window').width === 1168
                         ? '15.5%'
-                        : '10%',
+                        : '12%',
                   }}
                   onPress={() => this.handleAdd()}>
                   {this.props.lg ? (
@@ -738,6 +754,8 @@ export class StepTwo extends PureComponent {
                   ? '7%'
                   : Dimensions.get('window').height > 1309 &&
                     Dimensions.get('window').height < 1310
+                  ? '6%'
+                  : Dimensions.get('window').width === 600
                   ? '6%'
                   : '10%',
               width: '100%',
