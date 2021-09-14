@@ -15,12 +15,13 @@ import * as ACTIONS from './Actions';
 import SelectDropdown from 'react-native-select-dropdown';
 import {Svg, Line} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/AntDesign';
+import axios from 'axios';
 
 export class StepTwo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      tourism: false,
+      loisir: false,
       company: false,
       shooting: false,
       seminaire: false,
@@ -40,33 +41,44 @@ export class StepTwo extends PureComponent {
       Number: null,
       commentaire: null,
       orientation: null,
+      countries: null,
+      nameRoom: null,
+      nomRoom: null,
     };
     this.handleAdd = this.handleAdd.bind(this);
     this.handleModifie = this.handleModifie.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleModifieAge = this.handleModifieAge.bind(this);
+    this.fetchData = this.fetchData.bind(this);
   }
 
   w = Dimensions.get('window').width;
   h = Dimensions.get('window').height;
 
+  fetchData = async () => {
+    await axios({
+      method: 'GET',
+      url: 'https://satisfaction.masdelafouque.com/api/v1/content/get_stuff',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }).then(res => {
+      let d = [];
+      res.data.room_names.map((items, index) => {
+        d.push(items.name);
+      });
+      this.setState({
+        countries: res.data.bracket,
+        nameRoom: d,
+      });
+    });
+  };
+
   componentDidMount = () => {
-    this.setState(prevState => ({
-      ...this.state,
-      raison: null,
-      profil: null,
-      AgeSexe: [],
-      sejour: this.props.route.params.data.sejour,
-      qualite: this.props.route.params.data.qualite,
-      repas: this.props.route.params.data.repas,
-      spa: this.props.route.params.data.spa,
-      activite: this.props.route.params.data.activite,
-      date: this.props.route.params.data.date,
-      heure: this.props.route.params.data.heure,
-      commentaire: this.props.route.params.data.commentaire,
-      Number: this.props.AddNumber,
-    }));
+    this.fetchData();
+
     this.props.handleAge();
+
     if (this.w < this.h) {
       this.setState(prevState => ({
         ...this.state,
@@ -78,6 +90,21 @@ export class StepTwo extends PureComponent {
         orientation: 'LANDSCAPE',
       }));
     }
+
+    let d = this.props.route.params.data;
+
+    this.setState({
+      ...this.state,
+      sejour: d.sejour,
+      qualite: d.qualite,
+      repas: d.repas,
+      spa: d.spa,
+      activite: d.activite,
+      date: d.date,
+      heure: d.heure,
+      commentaire: d.commentaire,
+      Number: this.props.AddNumber,
+    });
   };
 
   componentDidUpdate = (prevState, prevProps) => {
@@ -131,21 +158,21 @@ export class StepTwo extends PureComponent {
     questionnaire.activite = this.state.activite;
     questionnaire.commentaire = this.state.commentaire;
     questionnaire.date = this.props.route.params.data.heure;
-    questionnaire.tourisme = this.state.tourism ? 'oui' : 'non';
+    questionnaire.loisir = this.state.loisir ? 'oui' : 'non';
     questionnaire.entreprise = this.state.company ? 'oui' : 'non';
+    questionnaire.seminaire = this.state.seminaire ? 'oui' : 'non';
     questionnaire.shooting = this.state.shooting ? 'oui' : 'non';
     questionnaire.nom = this.state.entreprise;
     questionnaire.famille = this.state.famille;
     questionnaire.couple = this.state.couple;
+    questionnaire.NomChambre = this.state.nomRoom;
 
     questionnaire.datevalidation = submitTime;
     questionnaire.age = this.props.Age;
 
     this.props.handleSubmitBis(this.props.route.params.index, questionnaire);
-    this.props.navigation.navigate('Home');
+    //this.props.navigation.navigate('Home');
   };
-
-  countries = ['18-30', '30-45', '45+'];
 
   render() {
     return (
@@ -199,13 +226,81 @@ export class StepTwo extends PureComponent {
           </TouchableOpacity>
           <View
             style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              height: 50,
+            }}>
+            {this.state.nameRoom && (
+              <SelectDropdown
+                rowStyle={{backgroundColor: 'white', color: 'white'}}
+                rowTextStyle={{
+                  color: '#A99462',
+                  fontFamily: 'advent-Bd2',
+                  fontSize:
+                    Dimensions.get('window').width > 533 &&
+                    Dimensions.get('window').width < 534
+                      ? 14
+                      : Dimensions.get('window').width > 1066 &&
+                        Dimensions.get('window').width < 1067
+                      ? 20
+                      : Dimensions.get('window').width === 1168
+                      ? 24
+                      : 16,
+                }}
+                defaultButtonText={
+                  this.props.lg ? 'Nom de la chambre' : 'Room name'
+                }
+                buttonTextStyle={{
+                  color: '#A99462',
+                  fontFamily: 'advent-Bd2',
+                  fontSize:
+                    Dimensions.get('window').width > 533 &&
+                    Dimensions.get('window').width < 534
+                      ? 14
+                      : Dimensions.get('window').width > 1066 &&
+                        Dimensions.get('window').width < 1067
+                      ? 20
+                      : Dimensions.get('window').width === 1168
+                      ? 24
+                      : 16,
+                }}
+                buttonStyle={{
+                  backgroundColor: 'white',
+                  width: '40%',
+                  borderWidth: 1,
+                  borderColor: '#A99462',
+                  height: '100%',
+                }}
+                data={this.state.nameRoom}
+                onSelect={(selectedItem, id) => {
+                  this.setState(prevState => ({
+                    ...this.state,
+                    nomRoom: selectedItem,
+                  }));
+                }}
+                buttonTextAfterSelection={(selectedItem, index) => {
+                  // text represented after item is selected
+                  // if data array is an array of objects then return selectedItem.property to render after item is selected
+                  return selectedItem;
+                }}
+                rowTextForSelection={(item, index) => {
+                  // text represented for each item in dropdown
+                  // if data array is an array of objects then return item.property to represent item in dropdown
+                  return item;
+                }}
+              />
+            )}
+          </View>
+          <View
+            style={{
               marginTop:
                 Dimensions.get('window').width > 1066 &&
                 Dimensions.get('window').width < 1067
                   ? '10%'
                   : Dimensions.get('window').height === 1104
                   ? '10%'
-                  : '8%',
+                  : '5%',
               width: '100%',
             }}>
             {this.props.lg ? (
@@ -224,12 +319,12 @@ export class StepTwo extends PureComponent {
               <TouchableOpacity
                 style={{
                   ...Style.ButtonBis,
-                  backgroundColor: this.state.tourism ? '#A99462' : 'white',
+                  backgroundColor: this.state.loisir ? '#A99462' : 'white',
                 }}
                 onPress={() =>
                   this.setState(prevState => ({
                     ...this.state,
-                    tourism: !this.state.tourism,
+                    loisir: !this.state.loisir,
                     company: false,
                     shooting: false,
                     seminaire: false,
@@ -238,9 +333,9 @@ export class StepTwo extends PureComponent {
                 <Text
                   style={{
                     ...Style.text,
-                    color: this.state.tourism ? 'white' : '#A99462',
+                    color: this.state.loisir ? 'white' : '#A99462',
                   }}>
-                  {this.props.lg ? 'TOURISME' : 'TOURISM'}
+                  {this.props.lg ? 'LOISIR' : 'LEISURE'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -254,7 +349,7 @@ export class StepTwo extends PureComponent {
                     company: !prevState.company,
                     shooting: false,
                     seminaire: false,
-                    tourism: false,
+                    loisir: false,
                   }))
                 }>
                 <Text
@@ -475,7 +570,7 @@ export class StepTwo extends PureComponent {
                           ? '13.5%'
                           : '8%'
                         : Dimensions.get('window').width === 800
-                        ? '15%'
+                        ? '20%'
                         : Dimensions.get('window').width > 1066 &&
                           Dimensions.get('window').width < 1067
                         ? Dimensions.get('window').width > 1066 &&
@@ -523,59 +618,61 @@ export class StepTwo extends PureComponent {
                     marginTop: '3%',
                     alignItems: 'center',
                   }}>
-                  <SelectDropdown
-                    rowStyle={{backgroundColor: 'white', color: 'white'}}
-                    rowTextStyle={{
-                      color: '#A99462',
-                      fontFamily: 'advent-Bd2',
-                      fontSize:
-                        Dimensions.get('window').width > 533 &&
-                        Dimensions.get('window').width < 534
-                          ? 14
-                          : Dimensions.get('window').width > 1066 &&
-                            Dimensions.get('window').width < 1067
-                          ? 20
-                          : Dimensions.get('window').width === 1168
-                          ? 24
-                          : 16,
-                    }}
-                    defaultButtonText={items.age}
-                    buttonTextStyle={{
-                      color: '#A99462',
-                      fontFamily: 'advent-Bd2',
-                      fontSize:
-                        Dimensions.get('window').width > 533 &&
-                        Dimensions.get('window').width < 534
-                          ? 14
-                          : Dimensions.get('window').width > 1066 &&
-                            Dimensions.get('window').width < 1067
-                          ? 20
-                          : Dimensions.get('window').width === 1168
-                          ? 24
-                          : 16,
-                    }}
-                    buttonStyle={{
-                      backgroundColor: 'white',
-                      width: '40%',
-                      borderWidth: 1,
-                      borderColor: '#A99462',
-                      height: '100%',
-                    }}
-                    data={this.countries}
-                    onSelect={(selectedItem, id) => {
-                      this.handleModifieAge(selectedItem, index);
-                    }}
-                    buttonTextAfterSelection={(selectedItem, index) => {
-                      // text represented after item is selected
-                      // if data array is an array of objects then return selectedItem.property to render after item is selected
-                      return selectedItem;
-                    }}
-                    rowTextForSelection={(item, index) => {
-                      // text represented for each item in dropdown
-                      // if data array is an array of objects then return item.property to represent item in dropdown
-                      return item;
-                    }}
-                  />
+                  {this.state.countries && (
+                    <SelectDropdown
+                      rowStyle={{backgroundColor: 'white', color: 'white'}}
+                      rowTextStyle={{
+                        color: '#A99462',
+                        fontFamily: 'advent-Bd2',
+                        fontSize:
+                          Dimensions.get('window').width > 533 &&
+                          Dimensions.get('window').width < 534
+                            ? 14
+                            : Dimensions.get('window').width > 1066 &&
+                              Dimensions.get('window').width < 1067
+                            ? 20
+                            : Dimensions.get('window').width === 1168
+                            ? 24
+                            : 16,
+                      }}
+                      defaultButtonText={items.age}
+                      buttonTextStyle={{
+                        color: '#A99462',
+                        fontFamily: 'advent-Bd2',
+                        fontSize:
+                          Dimensions.get('window').width > 533 &&
+                          Dimensions.get('window').width < 534
+                            ? 14
+                            : Dimensions.get('window').width > 1066 &&
+                              Dimensions.get('window').width < 1067
+                            ? 20
+                            : Dimensions.get('window').width === 1168
+                            ? 24
+                            : 16,
+                      }}
+                      buttonStyle={{
+                        backgroundColor: 'white',
+                        width: '30%',
+                        borderWidth: 1,
+                        borderColor: '#A99462',
+                        height: '100%',
+                      }}
+                      data={this.state.countries}
+                      onSelect={(selectedItem, id) => {
+                        this.handleModifieAge(selectedItem, index);
+                      }}
+                      buttonTextAfterSelection={(selectedItem, index) => {
+                        // text represented after item is selected
+                        // if data array is an array of objects then return selectedItem.property to render after item is selected
+                        return selectedItem;
+                      }}
+                      rowTextForSelection={(item, index) => {
+                        // text represented for each item in dropdown
+                        // if data array is an array of objects then return item.property to represent item in dropdown
+                        return item;
+                      }}
+                    />
+                  )}
                   <Icon
                     name="caretdown"
                     size={17}
@@ -585,8 +682,8 @@ export class StepTwo extends PureComponent {
                       marginLeft:
                         Dimensions.get('window').width > 533 &&
                         Dimensions.get('window').width < 534
-                          ? '33%'
-                          : '35%',
+                          ? '24%'
+                          : '26%',
                     }}
                   />
                   <TouchableOpacity
