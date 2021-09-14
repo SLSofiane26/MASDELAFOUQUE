@@ -103,10 +103,10 @@ export let handleSubmit = (data, datab) => async (dispatch, getState) => {
     .then(res => console.log(res))
     .catch(err => console.error(err));
 
-  //let f = getState().questionnaireBis.slice();
-  //f.splice(data, 1);
-  //await AsyncStorage.setItem('Rating', JSON.stringify(f));
-  //dispatch({type: 'ADDBIS', payload: {data: f}});
+  let f = getState().questionnaireBis.slice();
+  f.splice(data, 1);
+  await AsyncStorage.setItem('Rating', JSON.stringify(f));
+  dispatch({type: 'ADDBIS', payload: {data: f}});
 };
 
 export let handleAgeB = (data, datab) => async (dispatch, getState) => {
